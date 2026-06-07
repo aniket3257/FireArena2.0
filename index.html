@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>FireArena - Free Fire Tournament app</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* CSS INLINE STYLE ARCHITECTURE */
+        :root {
+            --bg-color: #090a0f;
+            --surface-color: #12141c;
+            --surface-accent: #1e2230;
+            --text-primary: #ffffff;
+            --text-secondary: #8a8f9f;
+            --color-primary: #6366f1;
+            --color-primary-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            --color-wallet-gradient: linear-gradient(135deg, #1e1b4b 0%, #311042 100%);
+            --color-success: #10b981;
+            --color-danger: #ef4444;
+            --color-warning: #f59e0b;
+            --font-main: 'Poppins', sans-serif;
+            --safe-area-top: env(safe-area-inset-top, 0px);
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            padding-top: var(--safe-area-top);
+        }
+
+        /* SCROLLBARS */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--surface-accent);
+            border-radius: 10px;
+        }
+
+        /* ANIMATIONS */
+        @keyframes modalSlideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* AUTHENTICATION VIEW */
+        #auth-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px;
+            background: radial-gradient(circle at center, #11131e 0%, var(--bg-color) 100%);
+        }
+
+        .auth-card {
+            background-color: var(--surface-color);
+            width: 100%;
+            max-width: 420px;
+            padding: 35px 25px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            border: 1px solid var(--surface-accent);
+        }
+
+        .auth-tabs {
+            display: flex;
+            background-color: var(--bg-color);
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 10px;
+            font-family: var(--font-main);
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .auth-tab.active {
+            background-color: var(--surface-accent);
+            color: var(--text-primary);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        /* INPUT SYSTEM */
+        .input-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-field {
+            width: 100%;
+            background-color: var(--bg-color);
+            border: 1px solid var(--surface-accent);
+            color: var(--text-primary);
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+            transition: border 0.2s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .btn {
+            width: 100%;
+            background: var(--color-primary-gradient);
+            color: var(--text-primary);
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
+            font-family: var(--font-main);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-secondary { background: var(--surface-accent); color: var(--text-primary); }
+        .btn-outline { background: transparent; border: 1px solid var(--surface-accent); color: var(--text-secondary); }
+
+        /* HEADER INTERFACE */
+        header {
+            background-color: var(--surface-color);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--surface-accent);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .user-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--surface-accent);
+        }
+
+        .user-info h2 {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .user-info p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* MAIN APP SHELL CONTAINER */
+        main {
+            flex: 1;
+            padding: 16px;
+            margin-bottom: calc(65px + var(--safe-area-bottom));
+            max-width: 600px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .app-view {
+            display: none;
+        }
+
+        .app-view.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* GRADIENT WALLET CARD MODULE */
+        .wallet-card {
+            background: var(--color-wallet-gradient);
+            border-radius: 20px;
+            padding: 22px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .wallet-balance-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .wallet-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .wallet-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .wallet-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .wallet-actions .btn {
+            padding: 10px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* MODERN CARD GAME MODULE */
+        .section-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .game-card {
+            background-color: var(--surface-color);
+            border-radius: 18px;
+            overflow: hidden;
+            margin-bottom: 18px;
+            border: 1px solid var(--surface-accent);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .game-banner {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            background-color: var(--surface-accent);
+        }
+
+        .game-details {
+            padding: 16px;
+        }
+
+        .game-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .game-time {
+            font-size: 0.8rem;
+            color: var(--color-warning);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .game-metrics-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            background-color: var(--bg-color);
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+
+        .metric-item label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .metric-item value {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        /* PROGRESS FILL BAR */
+        .progress-container {
+            margin-bottom: 14px;
+        }
+
+        .progress-bar-bg {
+            background-color: var(--surface-accent);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background: var(--color-primary-gradient);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* ROOM ACCESS & BADGE SYSTEM */
+        .room-card {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px dashed var(--color-success);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+
+        .room-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .room-row:last-child { margin-bottom: 0; }
+
+        .badge-joined {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background-color: var(--color-success);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* TRANSACTION LIST ITEM MODULE */
+        .tx-card {
+            background-color: var(--surface-color);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 10px;
+            border: 1px solid var(--surface-accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tx-info h4 { font-size: 0.9rem; font-weight: 500; }
+        .tx-info p { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
+        .tx-amount { font-weight: 600; font-size: 1rem; }
+        .tx-credit { color: var(--color-success); }
+        .tx-debit { color: var(--text-primary); }
+
+        /* BOTTOM IOS NAVIGATION SYSTEM */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(18, 20, 28, 0.94);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--surface-accent);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 calc(8px + var(--safe-area-bottom));
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-family: var(--font-main);
+            font-size: 0.7rem;
+            cursor: pointer;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .nav-item i { font-size: 1.2rem; }
+        .nav-item.active { color: var(--color-primary); }
+
+        /* FULL ANIMATED MODAL BOX INTERFACE */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal-content {
+            background-color: var(--surface-color);
+            width: 100%;
+            max-width: 500px;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            padding: 24px 20px calc(24px + var(--safe-area-bottom));
+            border-top: 1px solid var(--surface-accent);
+            animation: modalSlideUp 0.25s cubic-bezier(0.1, 0.76, 0.55, 0.94) forwards;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title { font-size: 1.2rem; font-weight: 600; }
+        .modal-close { background: none; border: none; color: var(--text-secondary); font-size: 1.2rem; cursor: pointer; }
+
+        /* TICKETS AND HELPDESK UI */
+        .ticket-box {
+            background-color: var(--surface-color);
+            border: 1px solid var(--surface-accent);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        .ticket-header { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 6px; }
+        .ticket-status { text-transform: uppercase; font-weight: 600; font-size: 0.7rem; }
+        .ticket-issue { font-size: 0.85rem; color: var(--text-secondary); }
+
+        /* EMPTY STATES */
+        .empty-placeholder {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        .empty-placeholder i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.3; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="auth-card">
+            <h1 style="text-align:center; font-size:1.8rem; font-weight:700; margin-bottom:20px; letter-spacing:0.5px; color:var(--color-primary)">AR CHAMPION</h1>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="toggleAuthMode('login')">Sign In</button>
+                <button class="auth-tab" onclick="toggleAuthMode('register')">Sign Up</button>
+            </div>
+
+            <div id="form-login" class="auth-form active">
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="auth-login-email" class="input-field" placeholder="gamer@domain.com">
+                </div>
+                <div class="input-group">
+                    <label>Account Password</label>
+                    <input type="password" id="auth-login-pass" class="input-field" placeholder="••••••••">
+                </div>
+                <button class="btn" onclick="executeAuthentication('login')">Login Terminal</button>
+            </div>
+
+            <div id="form-register" class="auth-form">
+                <div class="input-group">
+                    <label>Desired Handle Username</label>
+                    <input type="text" id="auth-reg-name" class="input-field" placeholder="ProGamerX">
+                </div>
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="auth-reg-email" class="input-field" placeholder="gamer@domain.com">
+                </div>
+                <div class="input-group">
+                    <label>Access Security Password</label>
+                    <input type="password" id="auth-reg-pass" class="input-field" placeholder="••••••••">
+                </div>
+                <button class="btn" onclick="executeAuthentication('register')">Register Player Profile</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-shell" style="display:none;">
+        <header>
+            <div class="user-meta">
+                <img id="user-avatar-node" class="avatar" src="https://ui-avatars.com/api/?name=Player&background=6366f1&color=fff" alt="Avatar">
+                <div class="user-info">
+                    <h2 id="user-display-name">Loading Profile...</h2>
+                    <p id="user-display-email">...</p>
+                </div>
+            </div>
+            <button onclick="triggerSignOut()" style="background:none; border:none; color:var(--text-secondary); font-size:1.1rem; cursor:pointer;"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </header>
+
+        <main>
+            <section id="view-home" class="app-view active">
+                <div class="wallet-card">
+                    <div class="wallet-balance-row">
+                        <div>
+                            <div class="wallet-label">Available Balance</div>
+                            <div class="wallet-amount" id="wallet-balance-val">₹0.00</div>
+                        </div>
+                        <i class="fa-solid fa-shield-halved" style="font-size:2rem; opacity:0.15;"></i>
+                    </div>
+                    <div class="wallet-actions">
+                        <button class="btn" onclick="openWalletModal('deposit')"><i class="fa-solid fa-circle-plus"></i> Deposit</button>
+                        <button class="btn btn-secondary" onclick="openWalletModal('withdraw')"><i class="fa-solid fa-money-bill-transfer"></i> Payout</button>
+                    </div>
+                </div>
+
+                <div class="section-title">Upcoming Tournament Arenas</div>
+                <div id="tournaments-feed-container">
+                    <div class="empty-placeholder"><i class="fa-solid fa-circle-nodes"></i><p>Scanning network streams for active games...</p></div>
+                </div>
+            </section>
+
+            <section id="view-profile" class="app-view">
+                <div class="section-title">Modify Profile Identifiers</div>
+                <div class="game-card" style="padding:20px;">
+                    <div class="input-group">
+                        <label>Current Display Username</label>
+                        <input type="text" id="profile-edit-name" class="input-field">
+                    </div>
+                    <button class="btn" style="margin-bottom:20px;" onclick="updateProfileUsername()">Apply Name Adjustment</button>
+
+                    <div class="input-group">
+                        <label>Update Account Password</label>
+                        <input type="password" id="profile-edit-pass" class="input-field" placeholder="Enter new password">
+                    </div>
+                    <button class="btn btn-secondary" onclick="updateProfilePassword()">Modify Password</button>
+                </div>
+
+                <div class="section-title" style="margin-top:24px;">Historical Ledger Transactions</div>
+                <div id="transactions-log-container">
+                    <div class="empty-placeholder"><i class="fa-solid fa-receipt"></i><p>No logged account statement transactions.</p></div>
+                </div>
+            </section>
+
+            <section id="view-support" class="app-view">
+                <div class="section-title">Help Center Desk</div>
+                <div class="game-card" style="padding:20px;">
+                    <div class="input-group">
+                        <label>Explain issue description scenario</label>
+                        <textarea id="support-issue-text" class="input-field" rows="4" style="resize:none;" placeholder="Deposit UTR tracking failed or mismatch balance entry..."></textarea>
+                    </div>
+                    <button class="btn" onclick="submitSupportTicket()">File Incident Complaint Ticket</button>
+                </div>
+
+                <div class="section-title" style="margin-top:24px;">Your Logged Incidents</div>
+                <div id="support-history-container">
+                    <div class="empty-placeholder"><i class="fa-solid fa-headset"></i><p>No reported tickets generated yet.</p></div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="navigateAppSection('home')">
+                <i class="fa-solid fa-gamepad"></i>
+                <span>Matches</span>
+            </button>
+            <button class="nav-item" onclick="navigateAppSection('profile')">
+                <i class="fa-solid fa-user-gear"></i>
+                <span>Profile</span>
+            </button>
+            <button class="nav-item" onclick="navigateAppSection('support')">
+                <i class="fa-solid fa-circle-question"></i>
+                <span>Support</span>
+            </button>
+        </nav>
+    </div>
+
+    <div class="modal-overlay" id="app-modal-layer">
+        <div class="modal-content" id="modal-content-injector">
+            </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, updateDoc, query, where, onSnapshot, getDoc, runTransaction, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // ADD YOUR SPECIFIC FIREBASE CONFIG PROJECT SETTINGS PARAMETERS BELOW
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // STATE MANAGER
+        let activeUserSessionProfile = null;
+        let setOfJoinedMatchesIds = new Set();
+        let runningListenersArray = [];
+
+        // ROUTER VIEW INTERACTIVE NAVIGATION MODULE
+        window.navigateAppSection = function(sectionKey) {
+            document.querySelectorAll('.app-view').forEach(view => view.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            document.getElementById(`view-${sectionKey}`).classList.add('active');
+            const targetBtn = document.querySelector(`.nav-item[onclick="navigateAppSection('${sectionKey}')"]`);
+            if(targetBtn) targetBtn.classList.add('active');
+        };
+
+        window.toggleAuthMode = function(mode) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            
+            if(mode === 'login') {
+                document.querySelectorAll('.auth-tab')[0].classList.add('active');
+                document.getElementById('form-login').classList.add('active');
+            } else {
+                document.querySelectorAll('.auth-tab')[1].classList.add('active');
+                document.getElementById('form-register').classList.add('active');
+            }
+        };
+
+        // ANIMATED ACTION SHEET OVERLAYS FOR USER ENGINE ALERTS
+        window.spawnModalOverlay = function(markupHtml) {
+            const container = document.getElementById('app-modal-layer');
+            document.getElementById('modal-content-injector').innerHTML = markupHtml;
+            container.classList.add('active');
+        };
+
+        window.dismissModalOverlay = function() {
+            document.getElementById('app-modal-layer').classList.remove('active');
+        };
+
+        // FIREBASE AUTH LIFECYCLE ROUTINES INTERACTION
+        window.executeAuthentication = async function(mode) {
+            if(mode === 'login') {
+                const email = document.getElementById('auth-login-email').value.trim();
+                const pass = document.getElementById('auth-login-pass').value;
+                if(!email || !pass) return triggerStatusAlert("Required Fields", "Provide credentials to continue.");
+                
+                try {
+                    await signInWithEmailAndPassword(auth, email, pass);
+                } catch(e) { triggerStatusAlert("Login Refused", e.message); }
+            } else {
+                const name = document.getElementById('auth-reg-name').value.trim();
+                const email = document.getElementById('auth-reg-email').value.trim();
+                const pass = document.getElementById('auth-reg-pass').value;
+                if(!name || !email || !pass) return triggerStatusAlert("Required Fields", "All submission forms are mandatory.");
+                
+                try {
+                    const credentials = await createUserWithEmailAndPassword(auth, email, pass);
+                    await setDoc(doc(db, "users", credentials.user.uid), {
+                        username: name,
+                        email: email,
+                        balance: 0
+                    });
+                } catch(e) { triggerStatusAlert("Sign Up Blocked", e.message); }
+            }
+        };
+
+        window.triggerSignOut = () => signOut(auth);
+
+        onAuthStateChanged(auth, (user) => {
+            if(user) {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('app-shell').style.display = 'block';
+                hookCoreAppLiveFeeds(user);
+            } else {
+                teardownActiveListeners();
+                document.getElementById('auth-screen').style.display = 'flex';
+                document.getElementById('app-shell').style.display = 'none';
+            }
+        });
+
+        function teardownActiveListeners() {
+            runningListenersArray.forEach(unsub => unsub());
+            runningListenersArray = [];
+        }
+
+        // REAL-TIME SYNCHRONIZED FIRESTORE DATABINDINGS
+        function hookCoreAppLiveFeeds(userInstance) {
+            teardownActiveListeners();
+
+            // 1) Real-time Profile Listener Engine
+            const unsubProfile = onSnapshot(doc(db, "users", userInstance.uid), (docSnap) => {
+                if(docSnap.exists()) {
+                    activeUserSessionProfile = docSnap.data();
+                    document.getElementById('user-display-name').innerText = activeUserSessionProfile.username || "Competitor";
+                    document.getElementById('user-display-email').innerText = activeUserSessionProfile.email;
+                    document.getElementById('wallet-balance-val').innerText = `₹${(activeUserSessionProfile.balance || 0).toFixed(2)}`;
+                    document.getElementById('profile-edit-name').value = activeUserSessionProfile.username || "";
+                    
+                    document.getElementById('user-avatar-node').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(activeUserSessionProfile.username || 'P')}&background=6366f1&color=fff`;
+                }
+            });
+            runningListenersArray.push(unsubProfile);
+
+            // 2) Real-time Matches Tracking Hook Module
+            const unsubMatches = onSnapshot(collection(db, `users/${userInstance.uid}/my_matches`), (snap) => {
+                setOfJoinedMatchesIds.clear();
+                snap.forEach(d => setOfJoinedMatchesIds.add(d.data().matchId));
+                evaluateTournamentsRenderPipeline();
+            });
+            runningListenersArray.push(unsubMatches);
+
+            // 3) Real-time Tournaments Board Feed Listener
+            const unsubTourneys = onSnapshot(collection(db, "tournaments"), () => {
+                evaluateTournamentsRenderPipeline();
+            });
+            runningListenersArray.push(unsubTourneys);
+
+            // 4) Real-time Statement Ledger History Submodule
+            const txQuery = query(collection(db, `users/${userInstance.uid}/transactions`), orderBy("date", "desc"));
+            const unsubLedger = onSnapshot(txQuery, (snap) => {
+                const holder = document.getElementById('transactions-log-container');
+                if(snap.empty) {
+                    holder.innerHTML = `<div class="empty-placeholder"><i class="fa-solid fa-receipt"></i><p>No statements parsed.</p></div>`;
+                    return;
+                }
+                let buffer = "";
+                snap.forEach(d => {
+                    const tx = d.data();
+                    const signClass = tx.type === 'credit' || tx.type === 'refund' ? 'tx-credit' : 'tx-debit';
+                    const prefix = tx.type === 'credit' || tx.type === 'refund' ? '+' : '-';
+                    buffer += `
+                        <div class="tx-card">
+                            <div class="tx-info">
+                                <h4>${tx.title}</h4>
+                                <p>${tx.date ? new Date(tx.date.seconds * 1000).toLocaleString() : 'Processing'}</p>
+                            </div>
+                            <div class="tx-amount ${signClass}">${prefix} ₹${tx.amount}</div>
+                        </div>
+                    `;
+                });
+                holder.innerHTML = buffer;
+            });
+            runningListenersArray.push(unsubLedger);
+
+            // 5) Real-time Support Tickets Listener Submodule
+            const ticketQuery = query(collection(db, "support_tickets"), where("userId", "==", userInstance.uid));
+            const unsubTickets = onSnapshot(ticketQuery, (snap) => {
+                const target = document.getElementById('support-history-container');
+                if(snap.empty) {
+                    target.innerHTML = `<div class="empty-placeholder"><i class="fa-solid fa-headset"></i><p>No reported tickets.</p></div>`;
+                    return;
+                }
+                let buffer = "";
+                snap.forEach(d => {
+                    const t = d.data();
+                    const color = t.status === 'open' ? 'var(--color-warning)' : 'var(--color-success)';
+                    buffer += `
+                        <div class="ticket-box">
+                            <div class="ticket-header">
+                                <span>Ref: ${d.id}</span>
+                                <span class="ticket-status" style="color:${color}">${t.status}</span>
+                            </div>
+                            <div class="ticket-issue">${t.issue}</div>
+                        </div>
+                    `;
+                });
+                target.innerHTML = buffer;
+            });
+            runningListenersArray.push(unsubTickets);
+        }
+
+        // COMPREHENSIVE DYNAMIC MATCH PRODUCTION PIPELINE
+        async function evaluateTournamentsRenderPipeline() {
+            const snapshot = await getDoc(collection(db, "tournaments"));
+            const holder = document.getElementById('tournaments-feed-container');
+            
+            // Re-fetch via fallback standard parsing sequence mapping
+            onSnapshot(collection(db, "tournaments"), (snapSnap) => {
+                if(snapSnap.empty) {
+                    holder.innerHTML = `<div class="empty-placeholder"><i class="fa-solid fa-gamepad"></i><p>No active tournament matches created.</p></div>`;
+                    return;
+                }
+                let buffer = "";
+                snapSnap.forEach(docNode => {
+                    const id = docNode.id;
+                    const m = docNode.data();
+                    const totalSlots = m.total || 100;
+                    const filledSlots = m.filled || 0;
+                    const percentageFilled = Math.min((filledSlots / totalSlots) * 100, 100);
+                    const parsedPlayerJoined = setOfJoinedMatchesIds.has(id);
+
+                    let dynamicActionButton = `<button class="btn" onclick="executeMatchRegistration('${id}', ${m.fee})">Join Arena • Entry ₹${m.fee}</button>`;
+                    if(parsedPlayerJoined) {
+                        dynamicActionButton = `<button class="btn btn-secondary" style="cursor:default;" disabled><i class="fa-solid fa-circle-check" style="color:var(--color-success)"></i> Enrolled Slot</button>`;
+                    } else if(filledSlots >= totalSlots) {
+                        dynamicActionButton = `<button class="btn btn-outline" style="cursor:not-allowed;" disabled>Arena Full</button>`;
+                    }
+
+                    let credentialsMarkup = "";
+                    if(parsedPlayerJoined && (m.roomId || m.password)) {
+                        credentialsMarkup = `
+                            <div class="room-card">
+                                <div class="room-row"><strong>Lobby Room ID:</strong> <span>${m.roomId || 'Pending Update'}</span></div>
+                                <div class="room-row"><strong>Gate Password:</strong> <span>${m.password || 'Pending Update'}</span></div>
+                            </div>
+                        `;
+                    }
+
+                    buffer += `
+                        <div class="game-card">
+                            ${parsedPlayerJoined ? `<div class="badge-joined">JOINED LIVE</div>` : ''}
+                            <img class="game-banner" src="${m.image}" onerror="this.src='https://via.placeholder.com/600x250/1e2230/ffffff?text=AR+CHAMPION+ARENA'" alt="Match Banner">
+                            <div class="game-details">
+                                <div class="game-title">${m.title}</div>
+                                <div class="game-time"><i class="fa-solid fa-clock"></i> Starts: ${m.time}</div>
+                                
+                                <div class="game-metrics-row">
+                                    <div class="metric-item"><label>Pool Prize</label><value>₹${m.pool}</value></div>
+                                    <div class="metric-item"><label>Entry Fee</label><value>₹${m.fee}</value></div>
+                                    <div class="metric-item"><label>Platform</label><value>Mobile</value></div>
+                                </div>
+
+                                <div class="progress-container">
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${percentageFilled}%"></div></div>
+                                    <div class="progress-labels"><span>Slots Filled: ${filledSlots}</span><span>Capacity: ${totalSlots}</span></div>
+                                </div>
+
+                                ${dynamicActionButton}
+                                ${credentialsMarkup}
+                            </div>
+                        </div>
+                    `;
+                });
+                holder.innerHTML = buffer;
+            });
+        }
+
+        // TRANSACTION CONTROL MATRIX: SECURE ARENA ENROLLMENT
+        window.executeMatchRegistration = async function(matchId, entryFee) {
+            if(!auth.currentUser) return;
+            
+            if((activeUserSessionProfile.balance || 0) < entryFee) {
+                return triggerStatusAlert("Insufficient Funds", "Your current wallet ledger does not have enough balance to cover the entry requirements.");
+            }
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const userRef = doc(db, "users", auth.currentUser.uid);
+                    const matchRef = doc(db, "tournaments", matchId);
+                    const trackingRef = doc(db, `users/${auth.currentUser.uid}/my_matches`, matchId);
+
+                    const matchSnap = await transaction.get(matchRef);
+                    if(!matchSnap.exists()) throw new Error("Match arena targeted was deleted.");
+                    
+                    const currentMatchData = matchSnap.data();
+                    if((currentMatchData.filled || 0) >= (currentMatchData.total || 100)) {
+                        throw new Error("Target arena pool allocation reached operational max limits.");
+                    }
+
+                    const trackingSnap = await transaction.get(trackingRef);
+                    if(trackingSnap.exists()) throw new Error("Double entry violation detected.");
+
+                    // Atomically adjust account balances
+                    const currentUserBalance = activeUserSessionProfile.balance || 0;
+                    transaction.update(userRef, { balance: currentUserBalance - entryFee });
+                    transaction.update(matchRef, { filled: (currentMatchData.filled || 0) + 1 });
+                    
+                    // Write enrollment metadata logs
+                    transaction.set(trackingRef, {
+                        matchId: matchId,
+                        title: currentMatchData.title,
+                        matchTime: currentMatchData.time,
+                        joinedAt: serverTimestamp()
+                    });
+
+                    // Append operational invoice ledger
+                    const txLogRef = doc(collection(db, `users/${auth.currentUser.uid}/transactions`));
+                    transaction.set(txLogRef, {
+                        title: `Joined: ${currentMatchData.title}`,
+                        amount: entryFee,
+                        type: "debit",
+                        date: serverTimestamp()
+                    });
+                });
+
+                triggerStatusAlert("Registration Complete", "You have secured your slot inside the tournament combat parameters.");
+            } catch (err) {
+                triggerStatusAlert("Transaction Refused", err.message);
+            }
+        };
+
+        // WALLET MANAGEMENT SHEETS MODULE
+        window.openWalletModal = async function(type) {
+            if(type === 'deposit') {
+                let gatewayUpi = "merchant@upi";
+                let gatewayQrUrl = "";
+                
+                try {
+                    const configSnap = await getDoc(doc(db, "settings", "payment"));
+                    if(configSnap.exists()) {
+                        gatewayUpi = configSnap.data().adminUpi || gatewayUpi;
+                        gatewayQrUrl = configSnap.data().qrCodeUrl || "";
+                    }
+                } catch(e){ console.error(e); }
+
+                const markup = `
+                    <div class="modal-header">
+                        <h3 class="modal-title">Deposit Wallet Request</h3>
+                        <button class="modal-close" onclick="dismissModalOverlay()"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        ${gatewayQrUrl ? `<div style="text-align:center; margin-bottom:15px;"><img src="${gatewayQrUrl}" style="max-width:180px; border-radius:12px;" alt="UPI QR QR"></div>` : ''}
+                        <div style="background:var(--bg-color); padding:12px; border-radius:12px; text-align:center; font-size:0.9rem; margin-bottom:15px; border:1px solid var(--surface-accent)">
+                            <span style="color:var(--text-secondary); display:block; font-size:0.75rem;">OFFICIAL UPI TARGET LINK</span>
+                            <strong>${gatewayUpi}</strong>
+                        </div>
+                        <div class="input-group"><label>Exact Deposit Value Capital (₹)</label><input type="number" id="w-amount" class="input-field" placeholder="500"></div>
+                        <div class="input-group"><label>12-Digit Banking Transaction reference UTR Number</label><input type="text" id="w-utr" class="input-field" placeholder="UTR Number Format Required"></div>
+                        <button class="btn" onclick="submitDepositQuery('${gatewayUpi}')">Transmit Transfer Request</button>
+                    </div>
+                `;
+                spawnModalOverlay(markup);
+            } else {
+                const markup = `
+                    <div class="modal-header">
+                        <h3 class="modal-title">Withdrawal Settlement Inquire</h3>
+                        <button class="modal-close" onclick="dismissModalOverlay()"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:15px;">Minimum validation bracket bound starts from ₹500. Submissions trigger immediate validation parsing escrow deductions.</p>
+                        <div class="input-group"><label>Withdraw Value Capital Requirement (₹)</label><input type="number" id="w-amount" class="input-field" placeholder="500"></div>
+                        <div class="input-group"><label>Your Target Destination UPI ID Handle String</label><input type="text" id="w-upi" class="input-field" placeholder="gamer@upi"></div>
+                        <button class="btn btn-secondary" onclick="submitWithdrawQuery()">Submit Payout Escrow File</button>
+                    </div>
+                `;
+                spawnModalOverlay(markup);
+            }
+        };
+
+        window.submitDepositQuery = async function() {
+            const amount = parseFloat(document.getElementById('w-amount').value) || 0;
+            const utr = document.getElementById('w-utr').value.trim();
+
+            if(amount <= 0 || !utr) return triggerStatusAlert("Invalid Entries", "Verify parameters are completely loaded before committing processing streams.");
+
+            dismissModalOverlay();
+            try {
+                const reqRef = doc(collection(db, "wallet_requests"));
+                await setDoc(reqRef, {
+                    userId: auth.currentUser.uid,
+                    username: activeUserSessionProfile.username,
+                    type: "deposit",
+                    amount: amount,
+                    utr: utr,
+                    status: "pending",
+                    timestamp: serverTimestamp()
+                });
+                triggerStatusAlert("Request Filed", "Administrator authorization processing streams initiated checking validation criteria.");
+            } catch(e) { triggerStatusAlert("Submission Error", e.message); }
+        };
+
+        window.submitWithdrawQuery = async function() {
+            const amount = parseFloat(document.getElementById('w-amount').value) || 0;
+            const userUpi = document.getElementById('w-upi').value.trim();
+
+            if(amount < 500 || !userUpi) return triggerStatusAlert("Violation Limit Error", "Payout values require minimum parameters bounding limits matching ₹500.");
+            if((activeUserSessionProfile.balance || 0) < amount) return triggerStatusAlert("Insufficient Funds", "Inquire balance asset profiles bounds exceed system values.");
+
+            dismissModalOverlay();
+            try {
+                await runTransaction(db, async (txn) => {
+                    const userRef = doc(db, "users", auth.currentUser.uid);
+                    const userSnap = await txn.get(userRef);
+                    const curBal = userSnap.data().balance || 0;
+
+                    if(curBal < amount) throw new Error("Balance insufficient execution rejected safety thresholds bounds.");
+
+                    // Instantly deduct withdrawal amount on request submission per system constraints
+                    txn.update(userRef, { balance: curBal - amount });
+                    
+                    const requestRef = doc(collection(db, "wallet_requests"));
+                    txn.set(requestRef, {
+                        userId: auth.currentUser.uid,
+                        username: activeUserSessionProfile.username,
+                        type: "withdraw",
+                        amount: amount,
+                        userUpi: userUpi,
+                        status: "pending",
+                        timestamp: serverTimestamp()
+                    });
+                });
+                triggerStatusAlert("Payout Escrow Loaded", "Escrow values parsed safely into check queues awaiting administrator dispatch clearance.");
+            } catch(e) { triggerStatusAlert("Payout Blocked Fault", e.message); }
+        };
+
+        // PROFILE MODIFICATION ACTIONS
+        window.updateProfileUsername = async function() {
+            const newName = document.getElementById('profile-edit-name').value.trim();
+            if(!newName) return;
+            try {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { username: newName });
+                triggerStatusAlert("Success", "Handle identification records overwritten cleanly across system databases.");
+            } catch(e) { triggerStatusAlert("Error", e.message); }
+        };
+
+        window.updateProfilePassword = async function() {
+            const newPass = document.getElementById('profile-edit-pass').value;
+            if(!newPass || newPass.length < 6) return triggerStatusAlert("Weak Entry Parameter", "Password string lengths require 6 minimum indexes.");
+            try {
+                await updatePassword(auth.currentUser, newPass);
+                document.getElementById('profile-edit-pass').value = "";
+                triggerStatusAlert("Success", "Security context parameters credentials updated.");
+            } catch(e) { triggerStatusAlert("Error", e.message); }
+        };
+
+        // SUPPORT HELPDESK TICKETS DISPATCH SYSTEM
+        window.submitSupportTicket = async function() {
+            const text = document.getElementById('support-issue-text').value.trim();
+            if(!text) return;
+            try {
+                const docRef = doc(collection(db, "support_tickets"));
+                await setDoc(docRef, {
+                    userId: auth.currentUser.uid,
+                    email: auth.currentUser.email,
+                    issue: text,
+                    status: "open",
+                    date: new Date().toLocaleDateString()
+                });
+                document.getElementById('support-issue-text').value = "";
+                triggerStatusAlert("Incident Created", "Help center tracking desk processed your request.");
+            } catch(e) { triggerStatusAlert("Error", e.message); }
+        };
+
+        // UNIVERSAL DYNAMIC DIALOG BOX OVERLAY ALERT INTERACTION
+        window.triggerStatusAlert = function(title, messages) {
+            const code = `
+                <div class="modal-header">
+                    <h3 class="modal-title">${title}</h3>
+                    <button class="modal-close" onclick="dismissModalOverlay()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="modal-body" style="font-size:0.95rem; color:var(--text-secondary); line-height:1.5; margin-bottom:20px;">
+                    ${messages}
+                </div>
+                <button class="btn btn-secondary" onclick="dismissModalOverlay()">Acknowledge Notice</button>
+            `;
+            spawnModalOverlay(code);
+        };
+    </script>
+</body>
+</html>

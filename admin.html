@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>FireArena - Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* CSS INLINE STYLE ARCHITECTURE */
+        :root {
+            --bg-color: #0d0e12;
+            --surface-color: #161820;
+            --surface-accent: #222533;
+            --text-primary: #ffffff;
+            --text-secondary: #8e94a6;
+            --color-primary: #6366f1;
+            --color-success: #10b981;
+            --color-danger: #ef4444;
+            --color-warning: #f59e0b;
+            --font-main: 'Poppins', sans-serif;
+            --safe-area-top: env(safe-area-inset-top, 0px);
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            padding-top: var(--safe-area-top);
+            padding-bottom: var(--safe-area-bottom);
+        }
+
+        /* UTILITIES & SCROLLBARS */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--surface-accent);
+            border-radius: 10px;
+        }
+
+        /* ANIMATIONS */
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes backdropFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* AUTHENTICATION VIEW */
+        #auth-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: radial-gradient(circle at top, #1e1b4b 0%, var(--bg-color) 70%);
+        }
+
+        .auth-container {
+            background-color: var(--surface-color);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            text-align: center;
+            border: 1px solid var(--surface-accent);
+        }
+
+        .auth-logo {
+            font-size: 3rem;
+            color: var(--color-primary);
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .auth-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .auth-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-field {
+            width: 100%;
+            background-color: var(--surface-accent);
+            border: 1px solid transparent;
+            color: var(--text-primary);
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 10px rgba(99,102,241,0.2);
+        }
+
+        .btn {
+            width: 100%;
+            background-color: var(--color-primary);
+            color: var(--text-primary);
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-family: var(--font-main);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-danger { background-color: var(--color-danger); }
+        .btn-success { background-color: var(--color-success); }
+        .btn-secondary { background-color: var(--surface-accent); color: var(--text-secondary); }
+
+        /* MAIN DASHBOARD STRUCTURE */
+        #admin-panel {
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--surface-color);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--surface-accent);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand i {
+            color: var(--color-warning);
+            font-size: 1.5rem;
+        }
+
+        .brand h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .logout-btn:hover {
+            color: var(--color-danger);
+        }
+
+        /* APPS MAIN CONTAINER */
+        main {
+            flex: 1;
+            padding: 20px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            margin-bottom: 75px; /* For mobile bottom nav space */
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        .view-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        /* STATS CARDS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: var(--surface-color);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-card.deposit { border-left: 5px solid var(--color-success); }
+        .stat-card.withdraw { border-left: 5px solid var(--color-danger); }
+        .stat-card.users { border-left: 5px solid var(--color-primary); }
+        .stat-card.games { border-left: 5px solid var(--color-warning); }
+
+        .stat-info h3 {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .stat-info p {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            opacity: 0.2;
+        }
+
+        /* CARD AND ITEMS MODULES */
+        .data-card {
+            background-color: var(--surface-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid var(--surface-accent);
+        }
+
+        .data-card.deposit-item { border-left: 4px solid var(--color-success); }
+        .data-card.withdraw-item { border-left: 4px solid var(--color-danger); }
+        .data-card.tournament-item { border-left: 4px solid var(--color-warning); }
+        .data-card.user-item { border-left: 4px solid var(--color-primary); }
+        .data-card.ticket-item { border-left: 4px solid var(--color-primary); }
+
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .card-meta {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-pending { background-color: rgba(245, 158, 11, 0.15); color: var(--color-warning); }
+        .badge-approved { background-color: rgba(16, 185, 129, 0.15); color: var(--color-success); }
+        .badge-rejected { background-color: rgba(239, 68, 68, 0.15); color: var(--color-danger); }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .card-actions .btn {
+            padding: 10px;
+            font-size: 0.875rem;
+        }
+
+        /* FLOATING ACTION BUTTON */
+        .fab {
+            position: fixed;
+            bottom: 85px;
+            right: 20px;
+            background-color: var(--color-primary);
+            color: #fff;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            cursor: pointer;
+            z-index: 90;
+            border: none;
+            font-size: 1.5rem;
+        }
+
+        /* BOTTOM NAVIGATION BAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--surface-color);
+            border-top: 1px solid var(--surface-accent);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 calc(10px + var(--safe-area-bottom));
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-family: var(--font-main);
+            font-size: 0.75rem;
+            cursor: pointer;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .nav-item i {
+            font-size: 1.25rem;
+        }
+
+        .nav-item.active {
+            color: var(--color-primary);
+        }
+
+        /* ANIMATED MODAL BOX CUSTOM SYSTEM */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.75);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+            animation: backdropFadeIn 0.2s ease-out forwards;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--surface-color);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 450px;
+            padding: 25px;
+            border: 1px solid var(--surface-accent);
+            animation: modalFadeIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .modal-footer .btn {
+            width: auto;
+            min-width: 100px;
+            padding: 10px 20px;
+        }
+
+        /* EMPTY STATES */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
+        /* RESPONSIVE DESIGN ADJUSTMENT */
+        @media(min-width: 768px) {
+            .bottom-nav {
+                top: 65px;
+                bottom: auto;
+                left: 200px;
+                border-top: none;
+                border-bottom: 1px solid var(--surface-accent);
+                justify-content: flex-end;
+                padding: 10px 40px;
+                gap: 30px;
+                background-color: transparent;
+            }
+            .bottom-nav .nav-item {
+                flex: none;
+                flex-direction: row;
+                gap: 8px;
+                font-size: 0.9rem;
+            }
+            header {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 220px;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: flex-start;
+                gap: 40px;
+                padding: 30px 20px;
+            }
+            #admin-panel {
+                padding-left: 220px;
+                padding-top: 65px;
+            }
+            main {
+                margin-bottom: 0;
+                padding: 40px;
+            }
+            .fab {
+                bottom: 30px;
+                right: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="auth-container">
+            <div class="auth-logo"><i class="fa-solid fa-trophy"></i></div>
+            <h2 class="auth-title">FireArena</h2>
+            <p class="auth-subtitle">Admin Control Terminal Panel</p>
+            
+            <div class="input-group">
+                <label>Admin Email</label>
+                <input type="email" id="login-email" class="input-field" placeholder="admin@archampion.com">
+            </div>
+            
+            <div class="input-group">
+                <label>Control Password</label>
+                <input type="password" id="login-password" class="input-field" placeholder="••••••••">
+            </div>
+            
+            <button class="btn" id="login-btn">Secure Login</button>
+        </div>
+    </div>
+
+    <div id="admin-panel">
+        <header>
+            <div class="brand">
+                <i class="fa-solid fa-crown"></i>
+                <h1>FireArena</h1>
+            </div>
+            <button class="logout-btn" id="logout-btn" title="Exit Dashboard">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+        </header>
+
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="switchView('home')">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" onclick="switchView('games')">
+                <i class="fa-solid fa-gamepad"></i>
+                <span>Games</span>
+            </button>
+            <button class="nav-item" onclick="switchView('users')">
+                <i class="fa-solid fa-users"></i>
+                <span>Users</span>
+            </button>
+            <button class="nav-item" onclick="switchView('settings')">
+                <i class="fa-solid fa-sliders"></i>
+                <span>Settings</span>
+            </button>
+        </nav>
+
+        <main>
+            <section id="view-home" class="view-section active">
+                <h2 class="view-title">Live Overview</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card users">
+                        <div class="stat-info">
+                            <h3>Total Players</h3>
+                            <p id="stat-total-users">0</p>
+                        </div>
+                        <i class="fa-solid fa-users stat-icon"></i>
+                    </div>
+                    <div class="stat-card deposit">
+                        <div class="stat-info">
+                            <h3>Pending Deposits</h3>
+                            <p id="stat-pending-deposits">0</p>
+                        </div>
+                        <i class="fa-solid fa-wallet stat-icon"></i>
+                    </div>
+                    <div class="stat-card withdraw">
+                        <div class="stat-info">
+                            <h3>Pending Payouts</h3>
+                            <p id="stat-pending-withdrawals">0</p>
+                        </div>
+                        <i class="fa-solid fa-money-bill-transfer stat-icon"></i>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom: 15px; font-weight: 500;">Pending Financial Requests</h3>
+                <div id="wallet-requests-container">
+                    <div class="empty-state"><i class="fa-solid fa-hourglass-neutral"></i><p>Loading real-time transactions...</p></div>
+                </div>
+            </section>
+
+            <section id="view-games" class="view-section">
+                <h2 class="view-title">Manage Tournaments</h2>
+                <div id="tournaments-container">
+                    <div class="empty-state"><i class="fa-solid fa-gamepad"></i><p>No active matches generated.</p></div>
+                </div>
+                <button class="fab" onclick="openCreateTournamentModal()" title="Create Tournament">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </section>
+
+            <section id="view-users" class="view-section">
+                <h2 class="view-title">Registered Gamers</h2>
+                <div id="users-list-container">
+                    <div class="empty-state"><i class="fa-solid fa-users"></i><p>No players discovered.</p></div>
+                </div>
+            </section>
+
+            <section id="view-settings" class="view-section">
+                <h2 class="view-title">Platform Gateway Config</h2>
+                
+                <div class="data-card">
+                    <h3 style="margin-bottom: 15px;">Payment Configurations</h3>
+                    <div class="input-group">
+                        <label>Merchant UPI ID Target</label>
+                        <input type="text" id="setup-admin-upi" class="input-field" placeholder="merchant@upi">
+                    </div>
+                    <div class="input-group">
+                        <label>QR Code Image Endpoint URL</label>
+                        <input type="text" id="setup-qr-url" class="input-field" placeholder="https://imgur.com/your-qr.png">
+                    </div>
+                    <button class="btn" onclick="savePaymentSettings()">Save Settings Configuration</button>
+                </div>
+
+                <h3 style="margin-top: 30px; margin-bottom: 15px; font-weight: 500;">Support Help Tickets</h3>
+                <div id="tickets-container">
+                    <div class="empty-state"><i class="fa-solid fa-headset"></i><p>No open customer support tickets.</p></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="custom-modal">
+        <div class="modal-content">
+            <h3 class="modal-title" id="modal-title-node">Alert Notice</h3>
+            <div class="modal-body" id="modal-body-node">Modal message template dynamic text injection.</div>
+            <div class="modal-footer" id="modal-footer-node">
+                <button class="btn btn-secondary" onclick="closeActiveModal()">Dismiss</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules via CDN strictly complying with regulations
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, query, where, onSnapshot, getDoc, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // ADD YOUR SPECIFIC FIREBASE CONFIG PROJECT SETTINGS PARAMETERS BELOW
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Core App Module Initialization Instance Handles
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Core App Routing View Logic States Switching UI Controls
+        window.switchView = function(viewKey) {
+            document.querySelectorAll('.view-section').forEach(node => node.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(node => node.classList.remove('active'));
+            
+            const targetedSection = document.getElementById(`view-${viewKey}`);
+            if(targetedSection) targetedSection.classList.add('active');
+            
+            const matchingNavBtn = document.querySelector(`nav.bottom-nav button[onclick="switchView('${viewKey}')"]`);
+            if(matchingNavBtn) matchingNavBtn.classList.add('active');
+        };
+
+        // ADVANCED ALERTS: PLUG IN REPLACING SYSTEM DIALOGS WITH CUSTOM ANIMATED MODALS
+        window.showModalAlert = function(title, bodyText, optionalButtonsHTML = null) {
+            const backdrop = document.getElementById('custom-modal');
+            document.getElementById('modal-title-node').innerText = title;
+            document.getElementById('modal-body-node').innerHTML = bodyText;
+            
+            if(optionalButtonsHTML) {
+                document.getElementById('modal-footer-node').innerHTML = optionalButtonsHTML;
+            } else {
+                document.getElementById('modal-footer-node').innerHTML = `<button class="btn btn-secondary" onclick="closeActiveModal()">Confirm</button>`;
+            }
+            backdrop.classList.add('active');
+        };
+
+        window.closeActiveModal = function() {
+            document.getElementById('custom-modal').classList.remove('active');
+        };
+
+        // ADMIN PANEL SECURE USER TRACKING ROUTING AUTH LIFECYCLES
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const emailValue = document.getElementById('login-email').value.trim();
+            const passwordValue = document.getElementById('login-password').value;
+
+            if(!emailValue || !passwordValue) {
+                showModalAlert('Access Denied', 'Fill up login requirement credential fields thoroughly.');
+                return;
+            }
+
+            try {
+                await signInWithEmailAndPassword(auth, emailValue, passwordValue);
+            } catch (err) {
+                showModalAlert('Authentication Error', err.message);
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                showModalAlert('Session Closed', 'Admin user logging out cleanly.');
+            });
+        });
+
+        onAuthStateChanged(auth, (userSession) => {
+            if(userSession) {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'flex';
+                initializeLiveDataSyncListeners();
+            } else {
+                document.getElementById('auth-screen').style.display = 'flex';
+                document.getElementById('admin-panel').style.display = 'none';
+            }
+        });
+
+        // LIVE FIRESTORE SYNCHRONIZATION DATA ROUTINES SUBMODULE
+        let dynamicListenersMap = [];
+
+        function initializeLiveDataSyncListeners() {
+            // Drop historical bindings prior to resetting state listeners safely
+            dynamicListenersMap.forEach(unsub => unsub());
+            dynamicListenersMap = [];
+
+            // 1) Users Counter Live Synchronization Module
+            const usersQuery = collection(db, "users");
+            const unsubUsers = onSnapshot(usersQuery, (snap) => {
+                document.getElementById('stat-total-users').innerText = snap.size;
+                renderUsersInterface(snap);
+            }, err => console.error(err));
+            dynamicListenersMap.push(unsubUsers);
+
+            // 2) Pending Wallet Requests Processing Engine Hook
+            const walletsQuery = query(collection(db, "wallet_requests"), where("status", "==", "pending"));
+            const unsubWallets = onSnapshot(walletsQuery, (snap) => {
+                let depCount = 0;
+                let witCount = 0;
+                snap.forEach(docNode => {
+                    const data = docNode.data();
+                    if(data.type === 'deposit') depCount++;
+                    if(data.type === 'withdraw') witCount++;
+                });
+                document.getElementById('stat-pending-deposits').innerText = depCount;
+                document.getElementById('stat-pending-withdrawals').innerText = witCount;
+                renderWalletRequestsInterface(snap);
+            });
+            dynamicListenersMap.push(unsubWallets);
+
+            // 3) Tournament Datastreams Tracking Node Hook
+            const tourneyQuery = collection(db, "tournaments");
+            const unsubTourney = onSnapshot(tourneyQuery, (snap) => {
+                renderTournamentsInterface(snap);
+            });
+            dynamicListenersMap.push(unsubTourney);
+
+            // 4) Support Center Ticketing Engine Integration Snap Hook
+            const supportQuery = collection(db, "support_tickets");
+            const unsubSupport = onSnapshot(supportQuery, (snap) => {
+                renderSupportTicketsInterface(snap);
+            });
+            dynamicListenersMap.push(unsubSupport);
+
+            // 5) Configuration Settings Lazy Initial Feed Setup Fetch
+            getDoc(doc(db, "settings", "payment")).then((snap) => {
+                if(snap.exists()) {
+                    const data = snap.data();
+                    document.getElementById('setup-admin-upi').value = data.adminUpi || '';
+                    document.getElementById('setup-qr-url').value = data.qrCodeUrl || '';
+                }
+            });
+        }
+
+        // DESIGN INTERFACE RENDERING: WALLET DISPATCH REQUEST ENGINE
+        function renderWalletRequestsInterface(snapshot) {
+            const targetBox = document.getElementById('wallet-requests-container');
+            if (snapshot.empty) {
+                targetBox.innerHTML = `<div class="empty-state"><i class="fa-solid fa-square-check"></i><p>All clean. No outstanding financial inquiries.</p></div>`;
+                return;
+            }
+
+            let codeBuffer = "";
+            snapshot.forEach((docNode) => {
+                const id = docNode.id;
+                const req = docNode.data();
+                const cardTypeClass = req.type === 'deposit' ? 'deposit-item' : 'withdraw-item';
+                const variableCredentialField = req.type === 'deposit' ? `UTR Check: ${req.utr}` : `Target UPI Destination: ${req.userUpi}`;
+
+                codeBuffer += `
+                    <div class="data-card ${cardTypeClass}">
+                        <div class="card-header-flex">
+                            <div>
+                                <span class="badge badge-pending">${req.type}</span>
+                                <div class="card-title" style="margin-top: 5px;">Player: ${req.username}</div>
+                            </div>
+                            <div style="font-size: 1.25rem; font-weight:700; color: ${req.type === 'deposit' ? 'var(--color-success)' : 'var(--color-danger)'}">
+                                ${req.type === 'deposit' ? '+' : '-'} ₹${req.amount}
+                            </div>
+                        </div>
+                        <div class="card-meta">${variableCredentialField}</div>
+                        <div class="card-meta">Timestamp: ${req.timestamp ? new Date(req.timestamp.seconds * 1000).toLocaleString() : 'Just now'}</div>
+                        <div class="card-actions">
+                            <button class="btn btn-success" onclick="processWalletAction('${id}', '${req.type}', '${req.userId}', ${req.amount}, 'approve')">Approve Request</button>
+                            <button class="btn btn-danger" onclick="triggerRejectPrompt('${id}', '${req.type}', '${req.userId}', ${req.amount}')">Reject Request</button>
+                        </div>
+                    </div>
+                `;
+            });
+            targetBox.innerHTML = codeBuffer;
+        }
+
+        // LOGIC REQUIRMENT: ARREST TRANSACTION ENGINE SECURITY (ATOMIC RUN TRANSACTIONS)
+        window.processWalletAction = async function(requestId, type, userId, amount, intentState, rejectionReason = "") {
+            closeActiveModal();
+            try {
+                await runTransaction(db, async (txn) => {
+                    const reqRef = doc(db, "wallet_requests", requestId);
+                    const userRef = doc(db, "users", userId);
+                    
+                    const reqSnap = await txn.get(reqRef);
+                    if (!reqSnap.exists() || reqSnap.data().status !== "pending") {
+                        throw new Error("Target transaction entry no longer outstanding or modified.");
+                    }
+
+                    const userSnap = await txn.get(userRef);
+                    let currentBalance = userSnap.exists() ? (userSnap.data().balance || 0) : 0;
+
+                    // Execute conditional balances adjustment rulesets
+                    if (intentState === 'approve') {
+                        if (type === 'deposit') {
+                            txn.update(userRef, { balance: currentBalance + amount });
+                        }
+                        // Withdraw amounts have already been subtracted instantly on request submission per requirements.
+                        txn.update(reqRef, { status: "approved" });
+                    } else if (intentState === 'reject') {
+                        if (type === 'withdraw') {
+                            // Refund step back on negative processing reject paths
+                            txn.update(userRef, { balance: currentBalance + amount });
+                        }
+                        txn.update(reqRef, { 
+                            status: "rejected",
+                            reason: rejectionReason 
+                        });
+                    }
+
+                    // Log audit trail reference mapping transactions object
+                    const newTxnRef = doc(collection(db, `users/${userId}/transactions`));
+                    txn.set(newTxnRef, {
+                        title: type === 'deposit' ? 'Wallet Deposit' : 'Wallet Withdrawal Request',
+                        amount: amount,
+                        type: intentState === 'approve' ? 'credit' : (type === 'withdraw' ? 'refund' : 'rejected_deposit'),
+                        date: serverTimestamp()
+                    });
+                });
+                showModalAlert('Success Operation', `Transaction processing completed successfully.`);
+            } catch (err) {
+                showModalAlert('Transaction Refused', err.message);
+            }
+        };
+
+        window.triggerRejectPrompt = function(requestId, type, userId, amount) {
+            if (type === 'withdraw') {
+                const modalBody = `
+                    <div class="input-group">
+                        <label>Specify Withdrawal Rejection Motive/Reason</label>
+                        <input type="text" id="reject-reason-input" class="input-field" placeholder="Incorrect Payment UPI Credentials">
+                    </div>
+                `;
+                const modalFooter = `
+                    <button class="btn btn-secondary" onclick="closeActiveModal()">Abort</button>
+                    <button class="btn btn-danger" onclick="submitWithdrawRejection('${requestId}','${userId}', ${amount})">Confirm Reject</button>
+                `;
+                showModalAlert('Reject Query Action Required', modalBody, modalFooter);
+            } else {
+                processWalletAction(requestId, type, userId, amount, 'reject', 'Deposit verification mismatched credentials.');
+            }
+        };
+
+        window.submitWithdrawRejection = function(requestId, userId, amount) {
+            const reasonVal = document.getElementById('reject-reason-input').value.trim() || "Rejected by operations administrator.";
+            processWalletAction(requestId, 'withdraw', userId, amount, 'reject', reasonVal);
+        };
+
+        // DESIGN INTERFACE RENDERING: TOURNAMENT CONTROLS DISPATCH MATRIX
+        function renderTournamentsInterface(snapshot) {
+            const holder = document.getElementById('tournaments-container');
+            if(snapshot.empty) {
+                holder.innerHTML = `<div class="empty-state"><i class="fa-solid fa-gamepad"></i><p>No tournament items populated currently.</p></div>`;
+                return;
+            }
+
+            let codeBuffer = "";
+            snapshot.forEach((docNode) => {
+                const id = docNode.id;
+                const match = docNode.data();
+                codeBuffer += `
+                    <div class="data-card tournament-item">
+                        <div class="card-header-flex">
+                            <div class="card-title">${match.title}</div>
+                            <span class="badge badge-approved">Filled: ${match.filled || 0}/${match.total || 100}</span>
+                        </div>
+                        <div class="card-meta"><i class="fa-solid fa-clock"></i> Schedule: ${match.time}</div>
+                        <div class="card-meta"><i class="fa-solid fa-ticket"></i> Fee: Entry ₹${match.fee} | Pool Reward: ₹${match.pool}</div>
+                        <div class="card-meta" style="background:var(--surface-accent); padding:10px; border-radius:8px; margin-top:10px;">
+                            <strong>Room ID:</strong> ${match.roomId || '<i>Pending Setup Unlock</i>'} <br>
+                            <strong>Password:</strong> ${match.password || '<i>Pending Setup Unlock</i>'}
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" onclick="openKeyAssignmentPrompt('${id}')"><i class="fa-solid fa-key"></i> Key Details</button>
+                            <button class="btn btn-danger" onclick="deleteMatchEntry('${id}')"><i class="fa-solid fa-trash-can"></i> Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+            holder.innerHTML = codeBuffer;
+        }
+
+        window.openCreateTournamentModal = function() {
+            const innerBody = `
+                <div class="input-group"><label>Match Heading Title</label><input type="text" id="t-title" class="input-field" placeholder="Squad Showdown Elite"></div>
+                <div class="input-group"><label>Event Timing Target Schedule</label><input type="text" id="t-time" class="input-field" placeholder="08 Nov - 09:00 PM"></div>
+                <div class="input-group"><label>Entry Charge Fees (₹)</label><input type="number" id="t-fee" class="input-field" value="50"></div>
+                <div class="input-group"><label>Total Prize Pool Capital (₹)</label><input type="number" id="t-pool" class="input-field" value="500"></div>
+                <div class="input-group"><label>Graphic Showcase Banner URL</label><input type="text" id="t-image" class="input-field" placeholder="https://imgur.com/banner.png"></div>
+                <div class="input-group"><label>Max Competitor Slots Total</label><input type="number" id="t-total" class="input-field" value="100"></div>
+            `;
+            const footerCode = `
+                <button class="btn btn-secondary" onclick="closeActiveModal()">Cancel</button>
+                <button class="btn btn-success" onclick="commitNewTournamentEntry()">Build Match</button>
+            `;
+            showModalAlert('Generate New Tournament Event Entry', innerBody, footerCode);
+        };
+
+        window.commitNewTournamentEntry = async function() {
+            const title = document.getElementById('t-title').value.trim();
+            const time = document.getElementById('t-time').value.trim();
+            const fee = parseFloat(document.getElementById('t-fee').value) || 0;
+            const pool = parseFloat(document.getElementById('t-pool').value) || 0;
+            const image = document.getElementById('t-image').value.trim() || 'https://via.placeholder.com/400x200';
+            const total = parseInt(document.getElementById('t-total').value) || 100;
+
+            if(!title || !time) {
+                alert('Fill Title and Schedule parameters.');
+                return;
+            }
+
+            closeActiveModal();
+            try {
+                const targetRef = doc(collection(db, "tournaments"));
+                await setDoc(targetRef, {
+                    title, time, fee, pool, image, total,
+                    filled: 0, roomId: "", password: ""
+                });
+                showModalAlert('Success Node', 'Tournament session deployed live.');
+            } catch (err) {
+                showModalAlert('Write Error Failed', err.message);
+            }
+        };
+
+        window.openKeyAssignmentPrompt = function(id) {
+            const formBody = `
+                <div class="input-group"><label>Room Account ID Identifier</label><input type="text" id="k-room" class="input-field" placeholder="9837424"></div>
+                <div class="input-group"><label>Access Secret Password Pass</label><input type="text" id="k-pass" class="input-field" placeholder="gaming@123"></div>
+            `;
+            const formFooter = `
+                <button class="btn btn-secondary" onclick="closeActiveModal()">Dismiss</button>
+                <button class="btn btn-primary" onclick="saveRoomKeys('${id}')">Publish Credentials</button>
+            `;
+            showModalAlert('Configure Live Lobby Access Data Keys', formBody, formFooter);
+        };
+
+        window.saveRoomKeys = async function(id) {
+            const roomId = document.getElementById('k-room').value.trim();
+            const password = document.getElementById('k-pass').value.trim();
+            
+            closeActiveModal();
+            try {
+                await updateDoc(doc(db, "tournaments", id), { roomId, password });
+                showModalAlert('Update Completed', 'Room access codes unlocked dynamically across target accounts.');
+            } catch (err) {
+                showModalAlert('Modifying Failed', err.message);
+            }
+        };
+
+        window.deleteMatchEntry = async function(id) {
+            if(confirm('Are you absolutely certain you want to purge this tournament listing?')) {
+                try {
+                    await deleteDoc(doc(db, "tournaments", id));
+                } catch(err) {
+                    showModalAlert('Execution Error', err.message);
+                }
+            }
+        };
+
+        // DESIGN INTERFACE RENDERING: REGISTERED USER ACCOUNTS MANAGER VIEW
+        function renderUsersInterface(snapshot) {
+            const outputContainer = document.getElementById('users-list-container');
+            if(snapshot.empty) {
+                outputContainer.innerHTML = `<div class="empty-state"><i class="fa-solid fa-users-slash"></i><p>No user accounts returned.</p></div>`;
+                return;
+            }
+
+            let codeBuffer = "";
+            snapshot.forEach((docNode) => {
+                const id = docNode.id;
+                const client = docNode.data();
+                codeBuffer += `
+                    <div class="data-card user-item">
+                        <div class="card-header-flex">
+                            <div>
+                                <div class="card-title">${client.username || 'Anonymous Fighter'}</div>
+                                <div class="card-meta" style="margin-top:2px; font-size:0.8rem;">ID Reference: ${id}</div>
+                                <div class="card-meta">${client.email}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:0.8rem; color:var(--text-secondary);">Balance</div>
+                                <div style="font-size:1.2rem; font-weight:700; color:var(--color-primary);">₹${client.balance || 0}</div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-secondary" onclick="openBalanceModificationWizard('${id}', ${client.balance || 0})"><i class="fa-solid fa-pen-to-square"></i> Modify Balance</button>
+                        </div>
+                    </div>
+                `;
+            });
+            outputContainer.innerHTML = codeBuffer;
+        }
+
+        window.openBalanceModificationWizard = function(id, existingBalance) {
+            const uiBody = `
+                <p style="margin-bottom:15px;">Current stored ledger credit profile holds: <strong>₹${existingBalance}</strong></p>
+                <div class="input-group">
+                    <label>Updated Absolute Target Value Balance Amount (₹)</label>
+                    <input type="number" id="target-balance-input" class="input-field" value="${existingBalance}">
+                </div>
+            `;
+            const uiFooter = `
+                <button class="btn btn-secondary" onclick="closeActiveModal()">Cancel</button>
+                <button class="btn btn-success" onclick="commitBalanceRevaluation('${id}')">Execute Overwrite</button>
+            `;
+            showModalAlert('Modify User Ledger Balance', uiBody, uiFooter);
+        };
+
+        window.commitBalanceRevaluation = async function(id) {
+            const parsedTargetVal = parseFloat(document.getElementById('target-balance-input').value) || 0;
+            closeActiveModal();
+            try {
+                await updateDoc(doc(db, "users", id), { balance: parsedTargetVal });
+                showModalAlert('Profile Adjusted', 'Gamer account financial balance record altered accurately.');
+            } catch (err) {
+                showModalAlert('Action Defied Exception', err.message);
+            }
+        };
+
+        // GLOBAL CONFIG DATA SETTINGS ROUTINES: MANAGEMENT CONTROL CHANNELS
+        window.savePaymentSettings = async function() {
+            const adminUpi = document.getElementById('setup-admin-upi').value.trim();
+            const qrCodeUrl = document.getElementById('setup-qr-url').value.trim();
+
+            try {
+                await setDoc(doc(db, "settings", "payment"), { adminUpi, qrCodeUrl });
+                showModalAlert('Configurations Consolidated', 'Gateway payment configurations written successfully into core database nodes.');
+            } catch(err) {
+                showModalAlert('Settings Interrupted', err.message);
+            }
+        };
+
+        // DESIGN INTERFACE RENDERING: REVENUE SUPPORT CUSTOMER TICKETS ENGINE
+        function renderSupportTicketsInterface(snapshot) {
+            const wrapperNode = document.getElementById('tickets-container');
+            if(snapshot.empty) {
+                wrapperNode.innerHTML = `<div class="empty-state"><i class="fa-solid fa-comment-slash"></i><p>No open help desk queries identified.</p></div>`;
+                return;
+            }
+
+            let codeBuffer = "";
+            snapshot.forEach((docNode) => {
+                const id = docNode.id;
+                const ticket = docNode.data();
+                const variantBadgeStyle = ticket.status === 'open' ? 'badge-pending' : 'badge-approved';
+
+                codeBuffer += `
+                    <div class="data-card ticket-item">
+                        <div class="card-header-flex">
+                            <div>
+                                <span class="badge ${variantBadgeStyle}">${ticket.status}</span>
+                                <div class="card-title" style="margin-top:8px;">User: ${ticket.email}</div>
+                            </div>
+                            <div class="card-meta">${ticket.date || 'Generic Date'}</div>
+                        </div>
+                        <div style="background:var(--surface-accent); padding:12px; border-radius:8px; margin: 10px 0; font-size:0.9rem;">
+                            ${ticket.issue}
+                        </div>
+                        ${ticket.status === 'open' ? `
+                            <div class="card-actions">
+                                <button class="btn btn-success" onclick="closeSupportTicket('${id}')"><i class="fa-solid fa-check"></i> Mark Resolved</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            wrapperNode.innerHTML = codeBuffer;
+        }
+
+        window.closeSupportTicket = async function(id) {
+            try {
+                await updateDoc(doc(db, "support_tickets", id), { status: "resolved" });
+                showModalAlert('Ticket Resolved', 'The support incident ticket status has been marked as resolved.');
+            } catch(err) {
+                showModalAlert('Request Broken', err.message);
+            }
+        };
+    </script>
+</body>
+</html>
