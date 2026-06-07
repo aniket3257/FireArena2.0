@@ -650,15 +650,16 @@
         import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, query, where, onSnapshot, getDoc, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
         // ADD YOUR SPECIFIC FIREBASE CONFIG PROJECT SETTINGS PARAMETERS BELOW
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
+     const firebaseConfig = {
+  apiKey: "AIzaSyCc4rYwM3jXr9JtjQdKn6oApftSAc5kNyo",
+  authDomain: "firearena2-bd9ec.firebaseapp.com",
+  databaseURL: "https://firearena2-bd9ec-default-rtdb.firebaseio.com",
+  projectId: "firearena2-bd9ec",
+  storageBucket: "firearena2-bd9ec.firebasestorage.app",
+  messagingSenderId: "949623849817",
+  appId: "1:949623849817:web:1ba0d213bf281b1d18c248",
+  measurementId: "G-SWKETR69Q3"
+};
         // Core App Module Initialization Instance Handles
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
